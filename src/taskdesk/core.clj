@@ -1,7 +1,9 @@
 (ns taskdesk.core
-    :require [taskdesk.dal.db :as db])
+     (:require [taskdesk.dal.db :as db]
+               [clojure.java.jdbc :as jdbc]))
 
-(defn foo
+(defn -main
   "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+  [& args]
+  (
+    println (jdbc/query db/db-map ["SELECT * FROM users"])))
