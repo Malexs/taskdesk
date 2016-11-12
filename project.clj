@@ -13,7 +13,6 @@
                  [metosin/ring-http-response "0.8.0"]
                  [compojure "1.5.1"]
                  [hiccup "1.0.5"]
-                 [selmer "1.0.9"]
-                 [enlive "1.0.0-20100502.112537-18"]]
+                 [selmer "1.0.9"]]
   :dev-dependencies [[lein-ring "0.4.0"]]
   :ring { :handler taskdesk.core/engine })
