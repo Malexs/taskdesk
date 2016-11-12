@@ -5,4 +5,12 @@
 
 (defn render-home-page
   [val]
-  (renderer/render "index.html" {:docs "document" :something val}))
+  (renderer/render "home.html" {:docs "document" :something val}))
+
+(defn render-auth-page
+  []
+  (renderer/render "home.html"))
+
+(defn render-user-page
+  [user]
+  (renderer/render "user.html" {:user user}))

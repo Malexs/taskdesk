@@ -4,7 +4,8 @@
             [clojure.java.jdbc :as jdbc]
             [compojure.route :as route]
             [compojure.handler :as handler]
-            [taskdesk.views.view :as view]))
+            [taskdesk.views.view :as view]
+            [ring.middleware.json :as middleware]))
 
 
 
@@ -15,9 +16,16 @@
     (view/render-home-page {:user val})
     ))
 
+(defn user
+  []
+  (let [val (jdbc/query db/db-map ["SELECT * FROM users"])]
+    (view/render-user-page {:user val})
+    ))
+
 (defroutes app-routes
            (GET "/" [] (index))
+           (GET "/user" [] (user))
            (route/not-found "Page not found"))
 
 (def engine
-  (handler/site app-routes))
+  (-> (handler/site app-routes) (middleware/wrap-json-body {:keywords? true})))
