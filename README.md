@@ -1,14 +1,13 @@
 # taskdesk
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library designed to reach exams >_<
 
 ## Usage
 
-FIXME
+Для запуска нужна MySQL на порте 3306 с подключением {:user "root" :password "root"}, бд {:name "taskdesk"}
+После добавления зависимостей в project.clj или после выкачивания репозитория сделать "lein deps"
+Для запуска "lein ring server"
 
 ## License
 
-Copyright © 2016 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+No license please...
