@@ -4,13 +4,17 @@
   (:require [taskdesk.views.renderer :as renderer]))
 
 (defn render-home-page
-  [val]
-  (renderer/render "home.html" {:docs "document" :something val}))
+  []
+  (renderer/render "home.html" {:docs "document"}))
 
 (defn render-signin-page
   []
-  (renderer/render "user.html"))
+  (renderer/render "auth.html"))
 
 (defn render-user-page
   [user]
   (renderer/render "user.html" {:user user}))
+
+(defn render-signup-page
+  []
+  (renderer/render "signup.html"))

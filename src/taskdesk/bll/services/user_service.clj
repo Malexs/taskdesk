@@ -10,5 +10,8 @@
   (sign-in [this login password]
     (.sign-in user-model login password))
 
+  (sign-up [this user-info]
+    (.sign-up user-model user-info))
+
   )
 

@@ -7,27 +7,34 @@
             [clojure.java.jdbc :as jdbc]
             [compojure.route :as route]
             [compojure.handler :as handler]
-            [ring.middleware.json :as middleware]))
+            [ring.middleware.json :as middleware]
+            [ring.util.response :as response]))
 
 (def user-model (user-db-model/->user-db-model db/db-map))
 (def user-service (user-service-d/->user-service user-model))
 
+(defn post-auth
+  [request]
+  (let [current-user (.sign-in user-service
+                               (get-in request [:params :login])
+                               (get-in request [:params :password]))]
 
-(defn index
-  "I just show main page."
-  []
-  (let [val (jdbc/query db/db-map ["SELECT * FROM users"])]
-    (view/render-home-page (first val))
-    ))
+         (if (= current-user nil)
+           (println "We dont have such user")
+           (response/redirect (str "user/" (:login current-user))))
+      ))
 
-(defn user
-  "I show single user page"
-  [login]
-  (view/render-user-page (.sign-in user-service login "admin")))
+(defn add-user
+  [request]
+  (.sign-up user-service (:params request)))
 
 (defroutes app-routes
-           (GET "/" [] (index))
-           (GET "/user/:login" [login] (user login))
+           (GET "/" [] (view/render-home-page))
+           (GET "/auth" [] (view/render-signin-page))
+           (POST "/auth" request (post-auth request))
+           (GET "/signup" [] (view/render-signup-page))
+           (POST "/signup" request (add-user request))
+           (GET "/user/:login" [login] (view/render-user-page (.sign-in user-service login "admin")))
            (route/not-found "Page not found"))
 
 (def engine
