@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ReplState" timestamp="1478790822050">{:repl-history {:ide [], :local [&quot;{1 2 3}&quot; &quot;[1 2 3]&quot; &quot;{:a 1 :b 2 :c 3}&quot; &quot;do (\n     set [ 1 2 3 4 1 2]\n     )&quot; &quot;do (\n     set [ 1 2 3 4 1 2])&quot; &quot;do (\n     def a { :a 1 }\n     def b conj a { :b 2 }\n     )&quot; &quot;do (\n     def a {:a 1}\n     assoc a { :b 2 } \n     )&quot; &quot;do (\n     def a\n     assoc a { :b 2 } \n     )&quot;], :remote []}}</component>
-</project>
