@@ -7,9 +7,9 @@
   [val]
   (renderer/render "home.html" {:docs "document" :something val}))
 
-(defn render-auth-page
+(defn render-signin-page
   []
-  (renderer/render "home.html"))
+  (renderer/render "user.html"))
 
 (defn render-user-page
   [user]
