@@ -1,9 +1,8 @@
-(ns taskdesk.dal.records.user-record)
+(ns taskdesk.dal.models.user-model)
 
 (defrecord user-record
   [id
    login
-   password
    name
    email
    role
