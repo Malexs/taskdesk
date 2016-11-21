@@ -1,4 +1,4 @@
-(ns taskdesk.dal.models.task-data-access-object)
+(ns taskdesk.dal.models.task-model)
 
 (defrecord task-record
   [;;unchangable
@@ -9,6 +9,6 @@
      title
      description
      milestone
-     label
      assignee
-     status])
+     status
+     group])

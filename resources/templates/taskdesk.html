@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <table>
+        <tr>
+            {% for group in groups %}
+                <td>
+                    <table>
+                        <tr>
+                            <td colspan="2">
+                                <div class="header">
+                                    {{group.name}}
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% for task in tasks %}
+                            {% ifequal task.group group.id %}
+                                <tr>
+                                    <td>Author</td>
+                                    <td>{{task.author}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Date</td>
+                                    <td>{{task.date}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Title</td>
+                                    <td>{{task.title}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>{{task.description}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Milestone</td>
+                                    <td>{{task.milestone}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Assignee</td>
+                                    <td>{{task.assignee}}</td>
+                                </tr>
+                                <tr>
+                                    <td>Status</td>
+                                    <td>{{task.status}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <a class="btn btn-default" href="taskdesk/task/{{task.id}}">Edit</a>
+                                    </td>
+                                </tr>
+                            {% endifequal %}
+                        {% endfor %}
+                    </table>
+                </td>
+            {% endfor %}
+        </tr>
+    </table>
+</div>
+
+{% endblock %}
