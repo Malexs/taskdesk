@@ -12,13 +12,14 @@
     [this]
     (.get-all-items user-model))
 
+  (add-item 
+    [this options]
+    (.add-item user-model options))
+
   user-protocol/user-service-protocol
 
   (sign-in [this login password]
     (.sign-in user-model login password))
-
-  (sign-up [this user-info]
-    (.sign-up user-model user-info))
 
   (get-user-by-login [this login]
     (def user (.get-user-by-login user-model login))

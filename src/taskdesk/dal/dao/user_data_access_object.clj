@@ -14,6 +14,15 @@
                         ["SELECT id, name
                           FROM users"])))
 
+  (add-item
+    [this options]
+    (jdbc/insert! db-map
+                  :users
+                  {:login     (:login options)
+                   :password  (:password options)
+                   :name      (:name options)
+                   :email     (:email options)}))
+
   user-protocol/user-db-protocol
 
   (sign-in
@@ -22,15 +31,6 @@
                       ["SELECT COUNT(*) as count
                         FROM users
                         WHERE login=? AND password=?" login password])))
-
-  (sign-up
-    [this user-info]
-    (jdbc/insert! db-map
-                  :users
-                  {:login     (:login user-info)
-                   :password  (:password user-info)
-                   :name      (:name user-info)
-                   :email     (:email user-info)}))
 
   (get-user-by-login
     [this login]

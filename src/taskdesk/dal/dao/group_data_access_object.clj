@@ -17,4 +17,8 @@
                                    (:id %1)
                                    (:name %1)))))
 
+  (add-item
+    [this options]
+    (println options))
+
   )

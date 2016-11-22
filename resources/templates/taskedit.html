@@ -3,17 +3,20 @@
 
 <div class="row">
     <div class="task">
-        <table>
-            <tr>
-                <td>Author</td>
-                <td>{{task.author}}</td>
-            </tr>
-            <tr>
-                <td>Date</td>
-                <td>{{task.date}}</td>
-            </tr>
-        </table>
-        <form action="/taskedit" method="post">
+        {% ifequal task nil %}
+        {% else %}
+            <table>
+                <tr>
+                    <td>Author</td>
+                    <td>{{task.author}}</td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>{{task.date}}</td>
+                </tr>
+            </table>
+        {% endifequal %}
+        <form action="/{% ifequal task nil %}taskadd{% else %}taskedit{% endifequal %}" method="post">
             <p style="display: none">
                 <input name="id" id="id" value="{{task.id}}"/>
             </p>
@@ -46,7 +49,15 @@
             </p>
             <p>
                 <label for="status">Status</label>
-                <input name="status" id="status" value="{{task.status}}"/>
+                <select name="status" id="status">
+                    {% for stat in stats %}
+                        {% ifequal stat.name task.status %}
+                            <option selected="selected">{{stat.name}}</option>
+                        {% else %}
+                            <option>{{stat.name}}</option>
+                        {% endifequal %}
+                    {% endfor %}
+                </select>
             </p>
             <p>
                 <label for="group">Group</label>

@@ -24,5 +24,5 @@
   (renderer/render "taskdesk.html" {:tasks tasks :groups groups}))
 
 (defn render-edit-task
-  [task users groups]
-  (renderer/render "taskedit.html" {:task task :users users :groups groups}))
+  [task users groups stats]
+  (renderer/render "taskedit.html" {:task task :users users :groups groups :stats stats}))

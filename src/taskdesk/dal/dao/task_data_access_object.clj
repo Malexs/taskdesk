@@ -39,6 +39,34 @@
                                    (:status %1)
                                    (:group %1)))))
 
+  (add-item
+    [this options]
+    (jdbc/execute! db/db-map
+                   ["INSERT INTO tasks (date,
+                                        title,
+                                        description,
+                                        milestone,
+                                        tasks.status,
+                                        author,
+                                        assignee,
+                                        tasks.group)
+                   values (?,
+                           ?,
+                           ?,
+                           ?,
+                           ?,
+                           (SELECT id FROM users WHERE name=?),
+                           (SELECT id FROM users WHERE name=?),
+                           (SELECT id FROM taskgroups WHERE name=?))"
+                    (:date options)
+                    (:title options)
+                    (:description options)
+                    (:milestone options)
+                    (:status options)
+                    (:author options)
+                    (:assignee options)
+                    (:group options)]))
+
   task-protocol/task-db-protocol
 
   (get-by-id
@@ -72,22 +100,8 @@
                                  (:status %1)
                                  (:group %1)))))
 
-  (add-task
-    [this task-opts]
-    (jdbc/insert! db/db-map
-                  :tasks
-                  {:author      (:author task-opts)
-                   :date        (:date task-opts)
-                   :title       (:title task-opts)
-                   :description (:description task-opts)
-                   :milestone   (:milestone task-opts)
-                   :assignee    (:assignee task-opts)
-                   :status      (:status task-opts)
-                   :group       (:group task-opts)}))
-
   (edit-task
     [this task-opts]
-    (def opts (:params task-opts))
     (jdbc/execute! db/db-map
                 ["UPDATE tasks as t
                 JOIN users as u
@@ -101,12 +115,12 @@
                     assignee=u.id,
                     t.group=tg.id
                 WHERE t.id=?"
-                 (:assignee opts)
-                 (:group opts)
-                 (:title opts)
-                 (:description opts)
-                 (:milestone opts)
-                 (:status opts)
-                 (Integer. (re-find #"[0-9]*" (:id opts)))]))
+                 (:assignee task-opts)
+                 (:group task-opts)
+                 (:title task-opts)
+                 (:description task-opts)
+                 (:milestone task-opts)
+                 (:status task-opts)
+                 (Integer. (re-find #"[0-9]*" (:id task-opts)))]))
 
   )
