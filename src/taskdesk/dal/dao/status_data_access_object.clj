@@ -15,6 +15,6 @@
                          FROM stats"])))
 
   (add-item
-    [_ _]
-    (println "\n"))
+    [this options]
+    (println options))
   )

@@ -1,5 +1,6 @@
 (ns taskdesk.bll.services.group-service
-  (:require [taskdesk.bll.protocols.common-service-protocol :as common-protocol]))
+  (:require [taskdesk.bll.protocols.common-service-protocol :as common-protocol]
+            [taskdesk.bll.protocols.group-service-protocol :as group-protocol]))
 
 (deftype group-service [group-dao]
 
@@ -13,6 +14,12 @@
 
   (add-item
     [this options]
-    (.add-item group-dao options))
+    (def opts (:params options))
+    (.add-item group-dao opts))
 
+  group-protocol/group-protocol
+
+  (delete-item
+    [this id]
+    (.delete-item group-dao id))
   )

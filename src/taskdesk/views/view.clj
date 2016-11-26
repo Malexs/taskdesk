@@ -26,3 +26,7 @@
 (defn render-edit-task
   [task users groups stats]
   (renderer/render "taskedit.html" {:task task :users users :groups groups :stats stats}))
+
+(defn render-edit-group
+  [group]
+  (renderer/render "groupedit.html" {:group group}))

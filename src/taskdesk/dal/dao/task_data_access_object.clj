@@ -123,4 +123,10 @@
                  (:status task-opts)
                  (Integer. (re-find #"[0-9]*" (:id task-opts)))]))
 
+  (delete-item
+    [this id]
+    (jdbc/delete! db/db-map
+                  :tasks
+                  ["id=?" id]))
+
   )

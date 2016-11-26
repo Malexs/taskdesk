@@ -56,6 +56,8 @@
       (.get-all-items usr-dao)
       (view/render-user-page (.get-user-by-login user-service login)))))
 
+
+
 (defroutes app-routes
            (GET "/" [] (response/redirect "/home"))
            (GET "/home" [] (view/render-home-page))
@@ -66,22 +68,35 @@
            (GET "/user/:login" [login] (show-user-page login))
            (GET "/user/logoff" [] (def logged false)
                                   (response/redirect "/home"))
-
+           ;;Tasks
            (GET "/taskdesk" [] (view/render-taskdesk-page (.get-all-items task-servise)
                                                           (.get-all-items group-service)))
            (GET "/taskdesk/task/:id" [id] (view/render-edit-task (.get-by-id task-servise id)
                                                                  (.get-all-items user-service)
-                                                                 (.get-all-items grp-dao)
+                                                                 (.get-all-items group-service)
                                                                  stats))
            (GET "/taskdesk/task/new" [] (view/render-edit-task nil
                                                                (.get-all-items user-service)
-                                                               (.get-all-items grp-dao)
+                                                               (.get-all-items group-service)
                                                                stats))
+           (GET "/taskdesk/task/delete/:id" [id] (.delete-item task-servise id)
+                                                 (response/redirect "/taskdesk"))
            (POST "/taskedit" request (.edit-task task-servise request)
                                      (response/redirect "/taskdesk"))
            (POST "/taskadd" request (.add-item task-servise request)
                                     (response/redirect "/taskdesk"))
-           (route/not-found "Page not found"))
+
+           ;;Groups
+           (GET "/taskdesk/group/new" [] (view/render-edit-group nil))
+           (GET "/taskdesk/group/delete/:id" [id] (.delete-item group-service id)
+                                                  (response/redirect "/taskdesk"))
+           ;(GET "/taskdesk/group/:id" [id] (view/render-edit-group nil))
+
+           (POST "/groupadd" request (.add-item group-service request)
+                                     (response/redirect "/taskdesk"))
+
+           (route/not-found "Page not found")
+           (route/resources "/"))
 
 (def engine
   (-> (handler/site app-routes) (middleware/wrap-json-body {:keywords? true})))

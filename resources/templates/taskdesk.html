@@ -15,6 +15,7 @@
                             <td colspan="2">
                                 <div class="header">
                                     {{group.name}}
+                                    <a href="/taskdesk/group/delete/{{group.id}}">Delete group</a>
                                 </div>
                             </td>
                         </tr>
@@ -50,8 +51,11 @@
                                     <td>{{task.status}}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2">
-                                        <a class="btn btn-default" href="taskdesk/task/{{task.id}}">Edit</a>
+                                    <td>
+                                        <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                    </td>
+                                    <td>
+                                        <a href="/taskdesk/task/delete/{{task.id}}">Delete</a>
                                     </td>
                                 </tr>
                             {% endifequal %}

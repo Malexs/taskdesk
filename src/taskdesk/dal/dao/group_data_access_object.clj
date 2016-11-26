@@ -1,5 +1,6 @@
 (ns taskdesk.dal.dao.group-data-access-object
   (:require [taskdesk.dal.protocols.common-db-protocol :as common-protocol]
+            [taskdesk.dal.protocols.group-db-protocol :as group-protocol]
             [taskdesk.dal.models.group-model :as group-model]
             [taskdesk.dal.db :as db]
             [clojure.java.jdbc :as jdbc]))
@@ -19,6 +20,16 @@
 
   (add-item
     [this options]
-    (println options))
+    (jdbc/insert! db/db-map
+                  :taskgroups
+                  {:name (:name options)}))
+
+  group-protocol/group-db-protocol
+
+  (delete-item
+    [this id]
+    (jdbc/delete! db/db-map
+                  :taskgroups
+                  ["id=?" id]))
 
   )
