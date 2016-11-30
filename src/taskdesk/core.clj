@@ -1,5 +1,6 @@
 (ns taskdesk.core
-  (:use compojure.core)
+  (:use compojure.core
+        ring.middleware.cookies)
   (:require [taskdesk.dal.db :as db]
             [taskdesk.views.view :as view]
             [taskdesk.dal.dao.user-data-access-object :as user-dao]
@@ -10,9 +11,13 @@
             [taskdesk.bll.services.task-service :as task-service-d]
             [taskdesk.bll.services.group-service :as group-service-d]
             [taskdesk.bll.services.status-service :as stat-service-d]
+            [taskdesk.bll.services.log-service :as ls]
+
+
             [compojure.route :as route]
             [compojure.handler :as handler]
             [ring.middleware.json :as middleware]
+            [ring.middleware.session :as ss]
             [ring.util.response :as response]))
 
 ;Users
@@ -31,6 +36,33 @@
 (def logged false)
 (def stats (.get-all-items stat-service))
 
+;; ------------------------ SESSION ACTIONS -------------------------
+(defn add-user-to-session [response request user]
+  (assoc response
+    :session (-> (:session request)
+                 (assoc :name (:name user))
+                 (assoc :role (:role user))
+                 (assoc :karma (:karma user))
+                 (assoc :id (:id user)))))
+
+(defn remove-user-from-session [response]
+  (assoc response
+    :cookies {"id" {:value nil}}
+    ;:session (-> (:session request)
+    ;                           (assoc :email (:email user))
+    ;                           (assoc :role (:role user))
+    ;                           (assoc :userid (:id user)))
+    ))
+
+(defn get-user-from-session [request]
+  (def user-info {:id (get-in request [:session :userid])
+                  :email (get-in request [:session :email])
+                  :role (get-in request [:session :role])})
+  user-info)
+
+  ;(get-in request [:session :email]))
+
+;; ---------------------------- USER ACTIONS ----------------------------
 (defn post-auth
   [request]
   (let [current-user (.sign-in user-service
@@ -38,59 +70,93 @@
                                (get-in request [:params :password]))
         request-login (get-in request [:params :login])]
 
-       (if (= (:count current-user) 0)
-         (println "We dont have such user")
-         (do
-             (def logged true)
-             (response/redirect (str "user/" request-login))))
-      ))
+    (if (= current-user nil)
+      (println "We dont have such user")
+      (do
+        (ls/log-signin (:name current-user))
+        (-> (response/redirect (str "user/" request-login))
+            (add-user-to-session request current-user))))))
 
 (defn add-user
   [request]
   (.sign-up user-service (:params request)))
 
 (defn show-user-page
-  [login]
+  [session login]
   (do
-    (when (true? logged)
-      (.get-all-items usr-dao)
-      (view/render-user-page (.get-user-by-login user-service login)))))
+      (view/render-user-page (.get-user-by-login user-service login) session)))
 
+;; ----------------------------- TASK ACTIONS ----------------------------
+(defn show-taskdesk
+  [session]
+  (do
+    (if (empty? session)
+      (response/redirect "/home")
+      (view/render-taskdesk-page (.get-all-items task-servise)
+                                 (.get-all-items group-service)
+                                 session))))
 
+(defn show-taskdesk-edit
+  [session id]
+  (do
+    (if (empty? session)
+      (response/redirect "/home")
+      (if (= id nil)
+          (view/render-edit-task id
+                                 (.get-all-items user-service)
+                                 (.get-all-items group-service)
+                                 stats
+                                 session)
+        (view/render-edit-task (.get-by-id task-servise id)
+                               (.get-all-items user-service)
+                               (.get-all-items group-service)
+                               stats
+                               session)))))
 
+(defn delete-task
+  [session id]
+  (do
+    (if (empty? session)
+      (response/redirect "/home")
+      (do
+        (.delete-item task-servise id)
+        (response/redirect "/taskdesk")))))
+
+(defn handle-task-edit-post
+  [task-info session]
+  (.edit-task task-servise task-info session)
+  (response/redirect "/taskdesk"))
+
+(defn handle-task-add-post
+  [task-info session]
+  (println session)
+  (.add-item task-servise task-info session)
+  (response/redirect "/taskdesk"))
+
+;; --------------------------------- ROUTES ------------------------------
 (defroutes app-routes
            (GET "/" [] (response/redirect "/home"))
-           (GET "/home" [] (view/render-home-page))
+           (GET "/home" [:as request] (view/render-home-page (:session request)))
            (GET "/auth" [] (view/render-signin-page))
            (POST "/auth" request (post-auth request))
            (GET "/signup" [] (view/render-signup-page))
            (POST "/signup" request (add-user request))
-           (GET "/user/:login" [login] (show-user-page login))
-           (GET "/user/logoff" [] (def logged false)
-                                  (response/redirect "/home"))
+           (GET "/user/:login" [:as request login] (show-user-page (:session request) login))
+           (POST "/user/logoff" request (ls/close-log)
+                                        (remove-user-from-session request)
+                                        (response/redirect "/home"))
            ;;Tasks
-           (GET "/taskdesk" [] (view/render-taskdesk-page (.get-all-items task-servise)
-                                                          (.get-all-items group-service)))
-           (GET "/taskdesk/task/:id" [id] (view/render-edit-task (.get-by-id task-servise id)
-                                                                 (.get-all-items user-service)
-                                                                 (.get-all-items group-service)
-                                                                 stats))
-           (GET "/taskdesk/task/new" [] (view/render-edit-task nil
-                                                               (.get-all-items user-service)
-                                                               (.get-all-items group-service)
-                                                               stats))
-           (GET "/taskdesk/task/delete/:id" [id] (.delete-item task-servise id)
-                                                 (response/redirect "/taskdesk"))
-           (POST "/taskedit" request (.edit-task task-servise request)
-                                     (response/redirect "/taskdesk"))
-           (POST "/taskadd" request (.add-item task-servise request)
-                                    (response/redirect "/taskdesk"))
+           (GET "/taskdesk" [:as request] (show-taskdesk (:session request)))
+           (GET "/taskdesk/task/:id" [:as request id] (show-taskdesk-edit (:session request) id))
+           (GET "/taskdesk/task/new" [:as request] (show-taskdesk-edit (:session request) nil))
+           (GET "/taskdesk/task/delete/:id" [:as request id] (delete-task (:session request) id))
+           (POST "/taskedit" [:as request] (handle-task-edit-post (:params request) (:session request)))
+           (POST "/taskadd" [:as request] (handle-task-add-post (:params request) (:session request)))
 
            ;;Groups
-           (GET "/taskdesk/group/new" [] (view/render-edit-group nil))
+           (GET "/taskdesk/group/new" [:as request] (view/render-edit-group nil (:session request)))
            (GET "/taskdesk/group/delete/:id" [id] (.delete-item group-service id)
                                                   (response/redirect "/taskdesk"))
-           ;(GET "/taskdesk/group/:id" [id] (view/render-edit-group nil))
 
            (POST "/groupadd" request (.add-item group-service request)
                                      (response/redirect "/taskdesk"))
@@ -99,4 +165,7 @@
            (route/resources "/"))
 
 (def engine
-  (-> (handler/site app-routes) (middleware/wrap-json-body {:keywords? true})))
+  (-> (handler/site app-routes)
+      (middleware/wrap-json-body {:keywords? true})
+      (ss/wrap-session)
+      (wrap-cookies)))

@@ -1,6 +1,8 @@
 (ns taskdesk.bll.services.task-service
   (:require [taskdesk.bll.protocols.task-service-protocol :as task-protocol]
             [taskdesk.bll.protocols.common-service-protocol :as common-protocol]
+            [taskdesk.bll.services.log-service :as ls]
+            [taskdesk.bll.invoice-center :as ic]
             [taskdesk.validation.task-validation :refer :all]
             [taskdesk.dal.dao.task-data-access-object :as task-dao])
   (import java.util.Date)
@@ -17,20 +19,27 @@
     response)
 
   (add-item
-    [this options]
-    (let [opts (:params options)
-          opts (assoc opts :date (.format (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss")(Date.)))
-          opts (assoc opts :author "admin")]
-      (if (is-correct-date? (:milestone opts))
-        (.add-item task-dao opts))))
+    [this options session]
+    (let [options (assoc options :date (.format (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss")(Date.)))
+          options (assoc options :author (:name session))]
+      (if (is-correct-date? (:milestone options))
+        (do
+          (ls/log-task-edit (:author options) (:title options) false)
+          (.add-item task-dao options))
+        (let [options (assoc options :milestone nil)]
+          (do
+            (ls/log-task-edit (:author options) (:title options) false)
+            (.add-item task-dao options))))))
 
   task-protocol/task-service-protocol
 
   (edit-task
-    [this task-opts]
-    (def opts (:params task-opts))
-    (if (is-correct-date? (:milestone opts))
-      (.edit-task task-dao opts)
+    [this task-opts session]
+    (if (is-correct-date? (:milestone task-opts))
+      (do
+        (ic/add-invoice (:assignee task-opts) (str "User (" (:name session) ") changed your task: (" (:title task-opts) ")"))
+        (ls/log-task-edit (:name session) (:title task-opts) true)
+        (.edit-task task-dao task-opts))
       (println "Incorrect date")
       )
   )

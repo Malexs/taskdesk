@@ -13,7 +13,7 @@
     response)
 
   (add-item
-    [this options]
+    [this options session]
     (def opts (:params options))
     (.add-item group-dao opts))
 

@@ -2,4 +2,4 @@
 
 (defprotocol common-service-protocol
   (get-all-items [this])
-  (add-item [this options]))
+  (add-item [this options session]))

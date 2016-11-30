@@ -4,15 +4,26 @@
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    {% style "/bootstrap/css/bootstrap.min.css" %}
-    {% style "/css/styles.css" %}
+    <link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/bootstrap/js/bootstrap.min.js"></script>
 </head>
 
 <body>
 <div class="header">
     {{page}}
     <a href="/home">Home</a>
-    <a href="/user/logoff">Log off</a>
+    {% ifequal session.id nil %}
+        <a class="btn btn-primary" href="/auth">Sign in</a>
+        <a class="btn btn-primary" href="/signup">Sign up</a>
+    {% else %}
+        <a class href="/taskdesk">Taskdesk</a>
+
+        <form action="/user/logoff" method="post">
+            <button type="submit">Log off</button>
+        </form>
+    {% endifequal %}
 </div>
 
 <div class="container">
@@ -20,7 +31,4 @@
     {% endblock %}
 </div>
 </div>
-
-{% script "/js/jquery.min.js" %}
-{% script "/bootstrap/js/bootstrap.min.js" %}
 </body>

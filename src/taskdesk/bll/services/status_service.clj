@@ -12,7 +12,7 @@
     response)
 
   (add-item
-    [this options]
+    [this options session]
     (.add-item status-dao options))
 
   )

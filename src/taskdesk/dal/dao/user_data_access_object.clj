@@ -28,10 +28,10 @@
   (sign-in
     [this login password]
     (first (jdbc/query db-map
-                      ["SELECT COUNT(*) as count
+                      ["SELECT *
                         FROM users
                         WHERE login=? AND password=?" login password])))
-
+  ;COUNT(*) as count
   (get-user-by-login
     [this login]
     (first (jdbc/query db-map

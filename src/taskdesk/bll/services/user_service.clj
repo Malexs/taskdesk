@@ -13,7 +13,7 @@
     (.get-all-items user-model))
 
   (add-item 
-    [this options]
+    [this options session]
     (.add-item user-model options))
 
   user-protocol/user-service-protocol

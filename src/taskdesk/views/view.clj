@@ -4,29 +4,29 @@
   (:require [taskdesk.views.renderer :as renderer]))
 
 (defn render-home-page
-  []
-  (renderer/render "home.html" {:docs "document"}))
+  [session]
+  (renderer/render "home.html" {:docs "document" :session session}))
 
 (defn render-signin-page
   []
   (renderer/render "auth.html"))
 
 (defn render-user-page
-  [user]
-  (renderer/render "user.html" {:user user}))
+  [user session]
+  (renderer/render "user.html" {:user user :session session}))
 
 (defn render-signup-page
   []
   (renderer/render "signup.html"))
 
 (defn render-taskdesk-page
-  [tasks groups]
-  (renderer/render "taskdesk.html" {:tasks tasks :groups groups}))
+  [tasks groups user]
+  (renderer/render "taskdesk.html" {:tasks tasks :groups groups :session user}))
 
 (defn render-edit-task
-  [task users groups stats]
-  (renderer/render "taskedit.html" {:task task :users users :groups groups :stats stats}))
+  [task users groups stats session]
+  (renderer/render "taskedit.html" {:task task :users users :groups groups :stats stats :session session}))
 
 (defn render-edit-group
-  [group]
-  (renderer/render "groupedit.html" {:group group}))
+  [group session]
+  (renderer/render "groupedit.html" {:group group :session session}))
