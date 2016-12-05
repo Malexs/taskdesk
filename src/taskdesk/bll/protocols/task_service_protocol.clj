@@ -3,4 +3,4 @@
 (defprotocol task-service-protocol
   (edit-task [this task-opts session])
   (get-by-id [this id])
-  (delete-item [this id]))
+  (delete-item [this id session]))

@@ -12,7 +12,7 @@
             [taskdesk.bll.services.group-service :as group-service-d]
             [taskdesk.bll.services.status-service :as stat-service-d]
             [taskdesk.bll.services.log-service :as ls]
-
+            [taskdesk.bll.invoice-center :as ic]
 
             [compojure.route :as route]
             [compojure.handler :as handler]
@@ -46,21 +46,13 @@
                  (assoc :id (:id user)))))
 
 (defn remove-user-from-session [response]
-  (assoc response
-    :cookies {"id" {:value nil}}
-    ;:session (-> (:session request)
-    ;                           (assoc :email (:email user))
-    ;                           (assoc :role (:role user))
-    ;                           (assoc :userid (:id user)))
-    ))
+  (assoc response :session nil))
 
 (defn get-user-from-session [request]
   (def user-info {:id (get-in request [:session :userid])
                   :email (get-in request [:session :email])
                   :role (get-in request [:session :role])})
   user-info)
-
-  ;(get-in request [:session :email]))
 
 ;; ---------------------------- USER ACTIONS ----------------------------
 (defn post-auth
@@ -74,6 +66,7 @@
       (println "We dont have such user")
       (do
         (ls/log-signin (:name current-user))
+        (ic/handle-sign-in (:name current-user))
         (-> (response/redirect (str "user/" request-login))
             (add-user-to-session request current-user))))))
 
@@ -85,6 +78,19 @@
   [session login]
   (do
       (view/render-user-page (.get-user-by-login user-service login) session)))
+
+(defn logout
+  []
+  ;(ls/close-log)
+  (-> (response/redirect "/home")
+      (remove-user-from-session)))
+
+(defn make-a-flush
+  [session]
+  (when (= (:role session) 0)
+    (println "\n\n" session "\n\n")
+    (ls/flush)
+    (response/redirect "/home")))
 
 ;; ----------------------------- TASK ACTIONS ----------------------------
 (defn show-taskdesk
@@ -119,7 +125,7 @@
     (if (empty? session)
       (response/redirect "/home")
       (do
-        (.delete-item task-servise id)
+        (.delete-item task-servise id session)
         (response/redirect "/taskdesk")))))
 
 (defn handle-task-edit-post
@@ -129,9 +135,20 @@
 
 (defn handle-task-add-post
   [task-info session]
-  (println session)
   (.add-item task-servise task-info session)
   (response/redirect "/taskdesk"))
+
+;; --------------------------------- INVOICE ACTIONS ---------------------
+
+(defn open-invoices-page
+  [session]
+  (view/render-invoice-page session))
+
+(defn handle-invoice-close
+  [session id]
+  (ic/remove-invoice (:name session) id)
+  (println session id)
+  (response/redirect "/invoices"))
 
 ;; --------------------------------- ROUTES ------------------------------
 (defroutes app-routes
@@ -142,9 +159,8 @@
            (GET "/signup" [] (view/render-signup-page))
            (POST "/signup" request (add-user request))
            (GET "/user/:login" [:as request login] (show-user-page (:session request) login))
-           (POST "/user/logoff" request (ls/close-log)
-                                        (remove-user-from-session request)
-                                        (response/redirect "/home"))
+           (POST "/user/logoff" [:as request] (logout))
+           (GET "/flush" [:as request] (make-a-flush (:session request)))
            ;;Tasks
            (GET "/taskdesk" [:as request] (show-taskdesk (:session request)))
            (GET "/taskdesk/task/:id" [:as request id] (show-taskdesk-edit (:session request) id))
@@ -160,6 +176,11 @@
 
            (POST "/groupadd" request (.add-item group-service request)
                                      (response/redirect "/taskdesk"))
+
+
+           ;;Invoices
+           (GET "/invoices" [:as request] (open-invoices-page (:session request)))
+           (POST "/invoices/delete" [:as request] (handle-invoice-close (:session request) (:id (:params request))))
 
            (route/not-found "Page not found")
            (route/resources "/"))

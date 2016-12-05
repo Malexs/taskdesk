@@ -22,13 +22,17 @@
     [this options session]
     (let [options (assoc options :date (.format (SimpleDateFormat. "yyyy-MM-dd HH:mm:ss")(Date.)))
           options (assoc options :author (:name session))]
+      (ls/log-task-edit (:author options) (:title options) false)
+      (ic/add-invoice (:assignee options) (str "User ("
+                                                 (:name session)
+                                                 ") assigned task: ("
+                                                 (:title options)
+                                                 ") for you."))
       (if (is-correct-date? (:milestone options))
         (do
-          (ls/log-task-edit (:author options) (:title options) false)
           (.add-item task-dao options))
         (let [options (assoc options :milestone nil)]
           (do
-            (ls/log-task-edit (:author options) (:title options) false)
             (.add-item task-dao options))))))
 
   task-protocol/task-service-protocol
@@ -37,7 +41,11 @@
     [this task-opts session]
     (if (is-correct-date? (:milestone task-opts))
       (do
-        (ic/add-invoice (:assignee task-opts) (str "User (" (:name session) ") changed your task: (" (:title task-opts) ")"))
+        (ic/add-invoice (:assignee task-opts) (str "User ("
+                                                   (:name session)
+                                                   ") changed your/assigned you to/disassigned you from task: ("
+                                                   (:title task-opts)
+                                                   ")"))
         (ls/log-task-edit (:name session) (:title task-opts) true)
         (.edit-task task-dao task-opts))
       (println "Incorrect date")
@@ -49,5 +57,7 @@
     (.get-by-id task-dao id))
 
   (delete-item
-    [this id]
-    (.delete-item task-dao id)))
+    [this id session]
+    (do
+      (ls/log-task-delete (:name session) id)
+      (.delete-item task-dao id))))
