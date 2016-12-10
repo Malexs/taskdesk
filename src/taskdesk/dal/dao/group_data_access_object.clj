@@ -1,4 +1,7 @@
 (ns taskdesk.dal.dao.group-data-access-object
+  (:use [taskdesk.dsl.execs]
+        [taskdesk.dsl.struct-func]
+        [taskdesk.dsl.renders])
   (:require [taskdesk.dal.protocols.common-db-protocol :as common-protocol]
             [taskdesk.dal.protocols.group-db-protocol :as group-protocol]
             [taskdesk.dal.models.group-model :as group-model]
@@ -11,12 +14,10 @@
 
   (get-all-items
     [this]
-    (into [] (jdbc/query db/db-map
-                         ["SELECT *
-                           FROM taskgroups"]
-                         :row-fn #(group-model/->group-record
-                                   (:id %1)
-                                   (:name %1)))))
+    (into [] (fetch (select (from :taskgroups))
+                    #(group-model/->group-record
+                              (:id %1)
+                              (:name %1)))))
 
   (add-item
     [this options]

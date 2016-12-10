@@ -52,11 +52,32 @@
                                 </tr>
                                 <tr>
                                     <td>
-                                        <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                        {% ifequal task.status "Closed" %}
+                                            {% ifequal session.superuser 1 %}
+                                                <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                            {% endifequal %}
+                                        {% else %}
+                                            {% ifequal session.name task.author %}
+                                                <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                                {% else %}
+                                                    {% ifequal session.name task.assignee %}
+                                                        <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                                    {% else %}
+                                                        {% ifequal session.superuser 1 %}
+                                                            <a class="btn btn-default" href="/taskdesk/task/{{task.id}}">Edit</a>
+                                                        {% endifequal %}
+                                                    {% endifequal %}
+                                            {% endifequal %}
+                                        {% endifequal %}
                                     </td>
                                     <td>
-                                        <a href="/taskdesk/task/delete/{{task.id}}">Delete</a>
+                                        {% ifequal session.superuser 1 %}
+                                            <a href="/taskdesk/task/delete/{{task.id}}">Delete</a>
+                                        {% endifequal %}
                                     </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" height="20px"></td>
                                 </tr>
                             {% endifequal %}
                         {% endfor %}

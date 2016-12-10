@@ -6,4 +6,5 @@
    name
    email
    role
-   karma])
+   karma
+   superuser])

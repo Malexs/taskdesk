@@ -66,7 +66,8 @@
 
 (defn handle-sign-in
   [user]
-  (let [user-invoices (into [] ((keyword user) @invoice-center))]
+  (let [kwrd (keyword user)
+        user-invoices (into [] ((keyword user) @invoice-center))]
     (when (empty? user-invoices)
       (swap! invoice-center conj {(keyword user) (.get-invoices inv-dao user)})
       (println @invoice-center))

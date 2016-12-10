@@ -19,8 +19,7 @@
   (send writer #(.close %)))
 
 (defn close-log []
-  ;(send log-agent close)
-  )
+  (send log-agent close))
 
 (defn flush-and-return [writer]
   (.flush writer))

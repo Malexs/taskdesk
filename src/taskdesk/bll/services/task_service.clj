@@ -41,11 +41,12 @@
     [this task-opts session]
     (if (is-correct-date? (:milestone task-opts))
       (do
-        (ic/add-invoice (:assignee task-opts) (str "User ("
-                                                   (:name session)
-                                                   ") changed your/assigned you to/disassigned you from task: ("
-                                                   (:title task-opts)
-                                                   ")"))
+        (if (not (= (:assignee task-opts) (:name session)))
+          (ic/add-invoice (:assignee task-opts) (str "User ("
+                                                     (:name session)
+                                                     ") changed your/assigned you to/disassigned you from task: ("
+                                                     (:title task-opts)
+                                                     ")")))
         (ls/log-task-edit (:name session) (:title task-opts) true)
         (.edit-task task-dao task-opts))
       (println "Incorrect date")

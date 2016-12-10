@@ -51,10 +51,18 @@
                 <label for="status">Status</label>
                 <select name="status" id="status">
                     {% for stat in stats %}
-                        {% ifequal stat.name task.status %}
-                            <option selected="selected">{{stat.name}}</option>
+                        {% ifequal stat.name "Finished" %}
+                            {% ifequal session.name task.assignee %}
+                                <option  {% ifequal stat.name task.status %}selected="selected"{% endifequal %}>{{stat.name}}</option>
+                            {% endifequal %}
                         {% else %}
-                            <option>{{stat.name}}</option>
+                            {% ifequal stat.name "Closed" %}
+                                {% ifequal session.superuser 1 %}
+                                    <option  {% ifequal stat.name task.status %}selected="selected"{% endifequal %}>{{stat.name}}</option>
+                                {% endifequal %}
+                            {% else %}
+                                <option  {% ifequal stat.name task.status %}selected="selected"{% endifequal %}>{{stat.name}}</option>
+                            {% endifequal %}
                         {% endifequal %}
                     {% endfor %}
                 </select>

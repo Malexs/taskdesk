@@ -1,4 +1,7 @@
 (ns taskdesk.dal.dao.invoice-dao
+  (:use [taskdesk.dsl.execs]
+        [taskdesk.dsl.struct-func]
+        [taskdesk.dsl.renders])
   (:require [clojure.java.jdbc :as jdbc]
             [taskdesk.dal.protocols.invoice-protocol :as ip]
             [taskdesk.dal.db :as db]))
@@ -17,7 +20,6 @@
 
   (watch-invoice
     [this user id]
-    (println "\n\n" user (type user) id (type id))
     (jdbc/execute! db/db-map
                    ["UPDATE invoices SET watched=1
                     WHERE user=? AND localid=?"
@@ -26,8 +28,8 @@
 
   (get-invoices
     [this user]
-    (into [] (jdbc/query db/db-map
-                       ["SELECT localid as id, text FROM invoices
-                        WHERE user=? AND watched=0"
-                        user])))
+    (into [] (fetch (select (fields {:id :localid
+                                     :text :text})
+                            (from :invoices)
+                            (where (and (== :user user) (== :watched 0)))))))
   )

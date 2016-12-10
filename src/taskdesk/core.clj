@@ -14,6 +14,8 @@
             [taskdesk.bll.services.log-service :as ls]
             [taskdesk.bll.invoice-center :as ic]
 
+            [taskdesk.dsl.execs :as dsl]
+
             [compojure.route :as route]
             [compojure.handler :as handler]
             [ring.middleware.json :as middleware]
@@ -33,17 +35,18 @@
 (def stt-dao (stat-dao/->status-data-access-object))
 (def stat-service (stat-service-d/->status-service stt-dao))
 ;Common
-(def logged false)
 (def stats (.get-all-items stat-service))
 
 ;; ------------------------ SESSION ACTIONS -------------------------
 (defn add-user-to-session [response request user]
+  (println user)
   (assoc response
     :session (-> (:session request)
                  (assoc :name (:name user))
                  (assoc :role (:role user))
                  (assoc :karma (:karma user))
-                 (assoc :id (:id user)))))
+                 (assoc :id (:id user))
+                 (assoc :superuser (:superuser user)))))
 
 (defn remove-user-from-session [response]
   (assoc response :session nil))
